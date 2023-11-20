@@ -6,17 +6,37 @@
 #SBATCH --job-name=flye
 #SBATCH --mail-user=zhihui.wang@students.unibe.ch
 #SBATCH --mail-type=begin,end
-#SBATCH --output=/data/u*/zwang/assembly/slurm_out/output_01an_flye_%j.o
-#SBATCH --error=/data/u*/zwang/assembly/slurm_out/error_01an_flye_%j.e
 #SBATCH --partition=pall
 
 COURSEDIR=/data/courses/assembly-annotation-course
-WORKDIR=/home/zwang/assembly/annotation/week1
+WORKDIR=/data/users/zwang/assembly/annotation/week1
 
 cd $WORKDIR
 
-# canu
-singularity exec --bind $CONTAINER --bind $WORKDIR ${CONTAINER}/EDTA_v1.9.6.sif EDTA.pl --genome ${WORKDIR}/canu_polished.fasta --species others --step all --cds ${WORKDIR}/TAIR10_cds_20110103_representative_gene_model --anno 1 --threads 16
+#canu
+singularity exec \
+--bind $COURSEDIR \
+--bind $WORKDIR \
+$COURSEDIR/containers2/EDTA_v1.9.6.sif \
+EDTA.pl \
+  --genome  ${WORKDIR}/canu_polished.fasta #The genome FASTA \
+  --species others \
+  --step all \
+  --cds ${WORKDIR}/TAIR10_cds_20110103_representative_gene_model # The coding sequences FASTA \
+  --anno 1 #perform whole-genome TE annotation after TE library construction \
+  --threads 16   #Number of threads to run this script (default: 4)
+
+
 
 #flye
-singularity exec --bind $CONTAINER --bind $WORKDIR ${CONTAINER}/EDTA_v1.9.6.sif EDTA.pl --genome ${WORKDIR}/flye_polished.fasta --species others --step all --cds ${WORKDIR}/TAIR10_cds_20110103_representative_gene_model --anno 1 --threads 16
+singularity exec \
+--bind $COURSEDIR \
+--bind $WORKDIR \
+$COURSEDIR/containers2/EDTA_v1.9.6.sif \
+EDTA.pl \
+  --genome  ${WORKDIR}/flye_polished.fasta #The genome FASTA \
+  --species others \
+  --step all \
+  --cds ${WORKDIR}/TAIR10_cds_20110103_representative_gene_model # The coding sequences FASTA \
+  --anno 1 #perform whole-genome TE annotation after TE library construction \
+  --threads 16   #Number of threads to run this script (default: 4)
