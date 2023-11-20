@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=8:00:00
+#SBATCH --mem=100
+#SBATCH --cpus-per-task=8
+#SBATCH --job-name=flye
+#SBATCH --mail-user=zhihui.wang@students.unibe.ch
+#SBATCH --mail-type=begin,end
+#SBATCH --partition=pall
+
+module load UHTS/Analysis/SeqKit/0.13.2
+WORKDIR=/data/users/zwang/assembly/annotation/brassica
+CONTAINER=/data/courses/assembly-annotation-course/containers2
+FASTA=/data/courses/assembly-annotation-course/
+cd $WORKDIR
+# Create a new FASTA file with Copia sequences
+seqkit grep -r -p "Copia" $FASTA/Brassicaceae_repbase_all_march2019.fasta > copia_sequences.fa
+
+# Create a new FASTA file with Gypsy sequences
+seqkit grep -r -p "Gypsy" $FASTA/Brassicaceae_repbase_all_march2019.fasta > gypsy_sequences.fa
+
+
+singularity exec \
+--bind $CONTAINER \
+--bind $WORKDIR \
+$CONTAINER/TEsorter_1.3.0.sif \
+TEsorter copia_sequences.fa -db rexdb-plant
+
+singularity exec \
+--bind $CONTAINER \
+--bind $WORKDIR  \
+$CONTAINER/TEsorter_1.3.0.sif \
+TEsorter gypsy_sequences.fa -db rexdb-plant
