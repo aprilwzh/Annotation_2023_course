@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=8:00:00
+#SBATCH --mem=100
+#SBATCH --cpus-per-task=8
+#SBATCH --job-name=flye
+#SBATCH --mail-user=zhihui.wang@students.unibe.ch
+#SBATCH --mail-type=begin,end
+#SBATCH --partition=pall
+
+module load UHTS/Analysis/SeqKit/0.13.2
+
+
+#Specify directory structure and create them
+    course_dir=/data/users/zwang/assembly/annotation/
+        dynamics_dir=${course_dir}/06_TE_dynamics
+            TE_dating=${dynamics_dir}/TE_dating
+
+    mkdir ${dynamics_dir}
+    mkdir ${TE_dating}
+
+#Go to folder where results should be stored.
+    cd ${TE_dating}
+
+#Specify input directory and file
+    input_dir=${course_dir}/05_TE_annotation/TE_annotator/polished.fasta.mod.EDTA.anno
+    input_file=${input_dir}/polished.fasta.mod.out
+    sed '1d;3d' ${TE_dating}/polished.fasta.mod.out.landscape.Div.Rname.tab > polished.fasta.sed.tab
