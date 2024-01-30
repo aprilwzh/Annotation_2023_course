@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=8:00:00
+#SBATCH --mem=100
+#SBATCH --cpus-per-task=8
+#SBATCH --job-name=flye
+#SBATCH --mail-user=zhihui.wang@students.unibe.ch
+#SBATCH --mail-type=begin,end
+#SBATCH --partition=pall
+
+#Add the modules
+    module add SequenceAnalysis/GenePrediction/maker/2.31.9
+
+#Define other dictionaries and variables that are used
+    COURSE_DIR=/data/courses/assembly-annotation-course
+    software_dir=/software
+
+#Specify directory structure and create them
+    course_dir=/data/users/zwang/assembly_course
+        prot_annotation_dir=${course_dir}/07_prot_annotation
+
+    mkdir ${prot_annotation_dir}
+
+#Go to folder where results should be stored.
+    cd ${prot_annotation_dir}
+
+#Copy data files from Monsur to RawData and make soft link course folder
+    # cp /data/users/mfaye/assembly_course/data/assemblies/trinity_out/assembly.fasta ${course_dir}/RawData
+
+mpiexec -n 16 singularity exec \
+--bind $SCRATCH \
+--bind ${COURSE_DIR} \
+--bind ${course_dir} \
+--bind ${software_dir} \
+${COURSE_DIR}/containers2/MAKER_3.01.03.sif \
+maker -mpi maker_opts.ctl maker_bopts.ctl maker_exe.ctl
