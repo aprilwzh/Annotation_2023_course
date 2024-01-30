@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=8:00:00
+#SBATCH --mem=100
+#SBATCH --cpus-per-task=8
+#SBATCH --job-name=flye
+#SBATCH --mail-user=zhihui.wang@students.unibe.ch
+#SBATCH --mail-type=begin,end
+#SBATCH --partition=pall
+
+#Add the modules
+    module add UHTS/Analysis/SeqKit/0.13.2
+
+#Specify directory structure and create them
+    course_dir=/data/users/zwang/assembly_course
+        input_dir=${course_dir}/07_prot_annotation/polished.maker.output.renamed
+        comp_genomics_dir=${course_dir}/09_comp_genomics
+            bed_dir=${comp_genomics_dir}/bed
+            peptide_dir=${comp_genomics_dir}/peptide
+            noseq_dir=${comp_genomics_dir}/noseq
+            proteins_dir=${comp_genomics_dir}/proteins
+
+    mkdir ${comp_genomics_dir}
+    mkdir ${bed_dir}
+    mkdir ${peptide_dir}
+    mkdir ${noseq_dir}
+    mkdir ${proteins_dir}
+
+#Specify the assembly to use
+    genome="polished"
+    data="C24"
+    input_noseq=${input_dir}/${genome}.all.maker.noseq.gff.renamed.gff
+    input_proteins=${input_dir}/${genome}.all.maker.proteins.fasta.renamed.fasta
+
+#Get all contings and sort them by size
+    awk '$3=="contig"' ${input_noseq} | sort -t $'\t' -k5 -n -r > ${comp_genomics_dir}/${data}_size_sorted_contigs.txt
+
+#Get the 10 longest
+    head -n10 ${comp_genomics_dir}/${data}_size_sorted_contigs.txt | cut -f1 > ${comp_genomics_dir}/${data}_contigs.txt
+
+#Create bed file
+    awk '$3=="mRNA"' ${input_noseq} | cut -f 1,4,5,9 | sed 's/ID=//' | sed 's/;.\+//' | grep -w -f ${comp_genomics_dir}/${data}_contigs.txt > ${bed_dir}/${data}.bed
