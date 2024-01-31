@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=01:00:00
+#BATCH --mem=64G
+#SBATCH --cpus-per-task=1
+#SBATCH --job-name=pacbio
+#SBATCH --mail-user=zhihui.wang@students.unibe.ch
+#SBATCH --mail-type=begin,end
+#SBATCH --output=/data/users/zwang/assembly/slurm_out/output_fastqc_%j.o
+#SBATCH --error=/data/users/zwang/assembly/slurm_out/error_fastqc_%j.e
+#SBATCH --partition=pall
+
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+module load UHTS/Quality_control/fastp/0.19.5
+module load UHTS/Assembler/canu/2.1.1
+module load UHTS/Assembler/flye/2.8.3
+module load UHTS/Assembler/trinityrnaseq/2.5.1
+Data_PATH=/data/users/zwang/assembly/participant_4/pacbio
+out=/data/users/zwang/assembly/canu_result
+cd $Data_PATH
+
+canu \
+ -p Arabidopsis -d $out \
+ genomeSize=126m \
+ -pacbio *.fastq.gz maxThreads=16 maxMemory=64 gridEngineResourceOption="--cpus-per-task=THREADS --mem-per-cpu=MEMORY"
+flye --pacbio-raw *.fastq.gz --out-dir $out_pacbio --threads 16
+Trinity --seqType fq --left *_1.fastq.gz --right *_2.fastq.gz --CPU 12 --max_memory 47G --output $out
