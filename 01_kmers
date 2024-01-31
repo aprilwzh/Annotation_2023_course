@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+
+#SBATCH --cpus-per-task=4
+#SBATCH --mem-per-cpu=5GB
+#SBATCH --time=02:00:00
+#SBATCH --job-name=k-mer
+#SBATCH --mail-user=zhihui.wang@students.unibe.ch
+#SBATCH --mail-type=begin,end
+#SBATCH --output=/home/zwang/assembly_coursee/slurm_out/output_fastqc_%j.o
+#SBATCH --error=/home/zwang/assembly_coursee/slurm_out/error_fastqc_%j.e
+#SBATCH --partition=pall
+
+module load UHTS/Analysis/jellyfish/2.3.0
+
+Data_PATH=/home/zwang/assembly_coursee/participant_4
+K_out=/home/zwang/assembly_coursee/kmer
+cd $Data_PATH
+for i in *;do
+        cd ${i}
+        #mkdir $K_out/${i}
+				cd $K_out/${i}
+        jellyfish count -m 14 -s 5Gb -t 4 \
+				<(zcat $Data_PATH/${i}/*.fastq.gz) 
+				jellyfish histo mer_counts.jf > mer_${i}.histo
+        cd $Data_PATH
+done
